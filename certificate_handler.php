@@ -19,12 +19,12 @@ if ($conn->connect_error) {
 
 // Validate the user ID from the URL parameter
 try {
-    if (isset($_GET['user_id'])) {
-        $userId = $_GET['user_id'];
+    if (isset($_GET['id'])) {
+        $userId = $_GET['id'];
         // You might want to validate or sanitize the user ID here
 
         // Fetch user data from the database
-        $sql = "SELECT email, linkedinUrl FROM information WHERE id = $userId";
+        $sql = "SELECT email, linkedinUrl FROM information WHERE id = id";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -35,9 +35,11 @@ try {
             // Send email with certificate link
             // ... (your existing email sending code)
 
+            $githubUsername = 'shivi15tripathi';
+            $repositoryName = 'hello';
             // Redirect to LinkedIn for sharing
-            $redirectUrl = 'https://www.linkedin.com/oauth/v2/authorization?client_id=86humtt1kqel42&redirect_uri=http://localhost/linkedin_callback.php&response_type=code&scope=r_liteprofile%20w_member_social';
-
+            $redirectUrl = 'https://www.linkedin.com/oauth/v2/authorization?client_id=86humtt1kqel42&redirect_uri=https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/linkedin_callback.php';
+            $redirectUrl .= '&shareoff=' . urlencode($linkedinShareUrl);
             header('Location: ' . $redirectUrl);
             exit();
         } else {

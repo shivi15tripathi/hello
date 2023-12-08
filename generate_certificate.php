@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,49 +48,50 @@
         }
     </style>
 </head>
+
 <body>
-<?php
-session_start();
+    <?php
+    session_start();
 
-require 'vendor/autoload.php';
+    require 'vendor/autoload.php';
 
-use TCPDF as TCPDF;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+    use TCPDF as TCPDF;
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
 
-$mail = new PHPMailer(true);
+    $mail = new PHPMailer(true);
 
-// Database connection details
-$host = "localhost";
-$username = "root";
-$password = "";
-$dbname = "auto_generate_certificate";
+    // Database connection details
+    $host = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "auto_generate_certificate";
 
-// Create connection
-$conn = new mysqli($host, $username, $password, $dbname);
+    // Create connection
+    $conn = new mysqli($host, $username, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-// Fetch data from the database
-$sql = "SELECT id, candidate_name, course, email, linkedinUrl FROM information";
-$result = $conn->query($sql);
+    // Fetch data from the database
+    $sql = "SELECT id, candidate_name, course, email, linkedinUrl FROM information";
+    $result = $conn->query($sql);
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $userId = $row['id'];
-        $candidateName = $row['candidate_name'];
-        $courseName = $row['course'];
-        $recipientEmail = $row['email'];
-        $recipientLink = $row['linkedinUrl'];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $userId = $row['id'];
+            $candidateName = $row['candidate_name'];
+            $courseName = $row['course'];
+            $recipientEmail = $row['email'];
+            $recipientLink = $row['linkedinUrl'];
 
-        // Generate unique PDF filename based on user ID
-        $pdfFilename = 'certificate_' . $userId . '.pdf';
+            // Generate unique PDF filename based on user ID
+            $pdfFilename = 'certificate_' . $userId . '.pdf';
 
-        // Certificate content
-        $certificateContent = "
+            // Certificate content
+            $certificateContent = "
             <div class='certificate'>
                 <div class='header'>
                     <h1 class='title'>Certificate of Achievement</h1>
@@ -109,59 +111,61 @@ if ($result->num_rows > 0) {
             </div>
         ";
 
-        ob_start();
-        $pdf = new TCPDF();
-        $pdf->AddPage();
-        $pdf->SetFont('helvetica', '', 12);
-        $pdf->writeHTML($certificateContent, true, false, true, false, '');
-        $permissions = array(
-            'print',
-            'copy',
-            'modify',
-            'annot-forms'
-        );
+            ob_start();
+            $pdf = new TCPDF();
+            $pdf->AddPage();
+            $pdf->SetFont('helvetica', '', 12);
+            $pdf->writeHTML($certificateContent, true, false, true, false, '');
+            $permissions = array(
+                'print',
+                'copy',
+                'modify',
+                'annot-forms'
+            );
 
-        // Save PDF to a unique path
-        $pdfPath = 'C:/xampp/htdocs/hello/download/' . $pdfFilename;
-        $pdf->SetProtection($permissions, '', null, 0, null);
-        $pdf->Output($pdfPath, 'F');
+            // Save PDF to a unique path
+            $pdfPath = 'C:/xampp/htdocs/hello/download/' . $pdfFilename;
+            $pdf->SetProtection($permissions, '', null, 0, null);
+            $pdf->Output($pdfPath, 'F');
+            $githubUsername = 'shivi15tripathi';
+            $repositoryName = 'hello';
 
-        // Send email
-        try {
-            $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = 'shivitripathi151@gmail.com';
-            $mail->Password   = 'lrhq ymto hrwm eizt';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port       = 587;
+            // Send email
+            try {
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'shivitripathi151@gmail.com';
+                $mail->Password   = 'lrhq ymto hrwm eizt';
+                $mail->SMTPSecure = 'tls';
+                $mail->Port       = 587;
 
-            $mail->setFrom('shivitripathi151@gmail.com', 'shivanitripathi');
-            $mail->addAddress($recipientEmail, $candidateName);
+                $mail->setFrom('shivitripathi151@gmail.com', 'shivanitripathi');
+                $mail->addAddress($recipientEmail, $candidateName);
 
-            $mail->isHTML(true);
-            $mail->Subject = 'Certificate of Achievement';
-            $mail->Body = "Please click the following link to view your Certificate of Achievement: <a href='https://www.linkedin.com/sharing/share-offsite/?url=http://localhost/hello/download/$pdfFilename'>Share on LinkedIn</a>";
+                $mail->isHTML(true);
+                $mail->Subject = 'Certificate of Achievement';
+                $mail->Body = "Please click the following link to view your Certificate of Achievement: <a href='https://www.linkedin.com/sharing/share-offsite/?url=https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/download/certificate_$userId.pdf'>Share on LinkedIn</a>";
 
-            // $mail->addAttachment($pdfPath, 'Certificate_of_Achievement.pdf');
+                // $mail->addAttachment($pdfPath, 'Certificate_of_Achievement.pdf');
 
-            $mail->send();
-        } catch (Exception $e) {
-            echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}<br>";
+                $mail->send();
+            } catch (Exception $e) {
+                echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}<br>";
+            }
+
+            // Display certificate
+            echo $certificateContent;
         }
-
-        // Display certificate
-        echo $certificateContent;
+    } else {
+        echo "No records found in the database.";
     }
-} else {
-    echo "No records found in the database.";
-}
 
-// Close the database connection
-$conn->close();
-?>
+    // Close the database connection
+    $conn->close();
+    ?>
 
-<div class="certificate">
+    <div class="certificate">
         <div class="header">
             <h1 class="title">Certificate of Achievement</h1>
         </div>
@@ -180,5 +184,5 @@ $conn->close();
     </div>
 
 </body>
-</html>
 
+</html>
