@@ -6,97 +6,117 @@ $clientID = '86humtt1kqel42';
 $clientSecret = '2udXns3paTcQ4T8d';
 $redirectURI = 'http://localhost/linkedin_callback.php';
 
-// Step 1: Get authorization code from the query parameters
-if (isset($_GET['code'])) {
-    $authorizationCode = $_GET['code'];
+// Replace these values with your database credentials
+$host = "localhost";
+$username = "root";
+$password = "";
+$dbname = "auto_generate_certificate";
 
-    // Step 2: Exchange authorization code for access token
-    $accessTokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
-    $accessTokenParams = [
-        'grant_type' => 'authorization_code',
-        'code' => $authorizationCode,
-        'redirect_uri' => $redirectURI,
-        'client_id' => $clientID,
-        'client_secret' => $clientSecret,
-    ];
+// Assume you have a user ID or some identifier in your session
+$userId = $_SESSION['id'];
 
-    $accessTokenResponse = getAccessToken($accessTokenUrl, $accessTokenParams);
+// Step 1: Retrieve LinkedIn URL from the database
+$pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+$statement = $pdo->prepare("SELECT linkedinurl FROM information WHERE id = :id");
+$statement->bindParam(':id', $userId, PDO::PARAM_INT);
+$statement->execute();
+$result = $statement->fetch(PDO::FETCH_ASSOC);
 
-    if (isset($accessTokenResponse['access_token'])) {
-        $accessToken = $accessTokenResponse['access_token'];
-
-        // Step 3: Use access token to share a post on LinkedIn
-        $shareUrl = 'https://api.linkedin.com/v2/shares';
-        $shareHeaders = [
-            'Authorization: Bearer ' . $accessToken,
-            'Content-Type: application/json',
-        ];
-        $certificateUrl = 'http://localhost/hello/download/' . $pdfFilename;
-
-        $shareContent = [
-            'content' => [
-                'contentEntities' => [
-                    [
-                        'entityLocation' => $certificateUrl,
-                    ],
-                ],
-                'title' => 'Certificate of Achievement',
-                'shareCommentary' => [
-                    'text' => 'I have achieved the Certificate of Achievement!',
-                ],
-            ],
-            'distribution' => [
-                'linkedInDistributionTarget' => [],
-            ],
-            'owner' => 'urn:li:person:your-linkedin-user-id', // Replace with the LinkedIn user ID
-        ];
-        
-        
-
-        $shareResponse = makeLinkedInApiRequest($shareUrl, $shareHeaders, 'POST', json_encode($shareContent));
-
-        if (isset($shareResponse['id'])) {
-            // Successfully shared the certificate on LinkedIn
-            // Redirect the user to a success page or their profile page
-            $successUrl = 'http://localhost/success.php';
-            header('Location: ' . $successUrl);
-            exit();
-        } else {
-            echo 'Failed to share on LinkedIn.';
-        }
-    } else {
-        echo 'Failed to obtain access token.';
-    }
-} else {
-    echo 'Authorization code not found.';
+if (!$result || !isset($result['linkedinurl'])) {
+    echo 'LinkedIn URL not found in the database for the user.';
+    exit();
 }
 
-// Function to make a POST request to get access token
-function getAccessToken($url, $params) {
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-    $response = curl_exec($ch);
-    curl_close($ch);
+// Step 2: Generate LinkedIn Share URL
+$githubUsername = 'shivi15tripathi';
+$repositoryName = 'hello';
+$userId = $_SESSION['id'];
 
-    return json_decode($response, true);
+// Construct the certificate URL on GitHub
+$certificateUrl = "https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/download/certificate_$userId.pdf";
+$linkedinShareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($certificateUrl);
+
+// Step 3: Initiate LinkedIn OAuth flow only if the user hasn't authorized yet
+if (!isset($_SESSION['linkedin_access_token'])) {
+    // Dynamic Redirect URI including user ID
+    $redirectURI = 'http://localhost/linkedin_callback.php?user_id=' . $userId;
+
+    // Step 4: Redirect the user to LinkedIn for authorization
+    $authUrl = 'https://www.linkedin.com/oauth/v2/authorization';
+    $authUrl .= '?response_type=code';
+    $authUrl .= '&client_id=' . $clientID;
+    $authUrl .= '&redirect_uri=' . urlencode($redirectURI);
+    $authUrl .= '&scope=r_liteprofile%20w_member_social';
+
+    // Redirect the user to the LinkedIn Authorization URL
+    header('Location: ' . $authUrl);
+    exit();
 }
 
-// Function to make a request to LinkedIn API
-function makeLinkedInApiRequest($url, $headers, $method = 'GET', $data = null) {
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+// The user has already authorized, proceed to share the certificate on LinkedIn
 
-    if ($data !== null) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    }
+// Fetch the LinkedIn access token from the session
+$accessToken = $_SESSION['linkedin_access_token'];
 
-    $response = curl_exec($ch);
-    curl_close($ch);
+// Use the access token to share the certificate on LinkedIn (your existing code)
+// ...
 
-    return json_decode($response, true);
+// Redirect the user to a success page or their profile page
+$successUrl = 'http://localhost/success.php';
+header('Location: ' . $successUrl);
+exit();
+?>
+
+<?php
+session_start();
+
+// Assume you have a user ID or some identifier in your session
+$userId = $_SESSION['id'];
+
+// GitHub repository information
+
+
+// Construct the certificate URL on GitHub
+$certificateUrl = "https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/download/certificate_$userId.pdf";
+
+// Construct LinkedIn Share URL
+$linkedinShareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($certificateUrl);
+
+// Redirect the user to the LinkedIn Share URL
+header('Location: ' . $linkedinShareUrl);
+exit();
+?>
+
+<?php
+session_start();
+
+// Replace these values with your database credentials
+$host = "localhost";
+$username = "root";
+$password = "";
+$dbname = "auto_generate_certificate";
+
+// Assume you have a user ID or some identifier in your session
+$userId = $_SESSION['id'];
+$githubUsername = 'shivi15tripathi';
+$repositoryName = 'hello';
+// Step 1: Retrieve Certificate URL from the database
+$pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+$statement = $pdo->prepare("SELECT certificate_url FROM information WHERE id = :id");
+$statement->bindParam(':id', $userId, PDO::PARAM_INT);
+$statement->execute();
+$result = $statement->fetch(PDO::FETCH_ASSOC);
+
+if (!$result || !isset($result['certificate_url'])) {
+    echo 'Certificate URL not found in the database for the user.';
+    exit();
 }
+
+// Step 2: Generate LinkedIn Share URL
+$certificateUrl = "https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/download/certificate_$userId.pdf";
+$linkedinShareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($certificateUrl);
+
+// Redirect the user to the LinkedIn Share URL
+header('Location: ' . $linkedinShareUrl);
+exit();
 ?>
