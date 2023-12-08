@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Participation certificate">
+    <meta property="og:description" content="this is your participation link">
+    <meta property="og:image" content="https://raw.githubusercontent.com/$githubUsername/$repositoryName/main/download/certificate_$userId.pdf">
+
     <title>Document</title>
     <style>
         body {
