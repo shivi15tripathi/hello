@@ -108,8 +108,6 @@
                     <p>awarded this</p>
                 </div>
                 <div class='signature'>
-                    <!-- Placeholder signature image (replace with your actual signature image) -->
-                    <img src='signature.png' alt='Signature'>
                     <p>John Smith<br>CEO, Example Academy</p>
                 </div>
             </div>
@@ -182,7 +180,7 @@
         </div>
         <div class="signature">
             <!-- Placeholder signature image (replace with your actual signature image) -->
-            <img src="signature.png" alt="Signature">
+            <!-- <img src="signature.png" alt="Signature"> -->
             <p>John Smith<br>CEO, Example Academy</p>
         </div>
     </div>
