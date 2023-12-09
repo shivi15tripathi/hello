@@ -34,7 +34,9 @@ if ($result->num_rows > 0) {
 
 
         // Construct LinkedIn Share URL using the share-offsite method
-        $linkedinShareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($certificateUrl);
+        // $linkedinShareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($certificateUrl);
+
+        $linkedinShareUrl = "https://www.linkedin.com/sharing/shareArticle?mini=true&url=" . urlencode($certificateUrl);
         
 
         // Redirect the user to the LinkedIn Share URL
