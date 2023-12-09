@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "ember-qunit": "^8.0.2"
+  }
+}
